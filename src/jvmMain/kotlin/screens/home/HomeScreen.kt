@@ -7,6 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -32,15 +35,9 @@ fun HomeScreen(
     navController: NavController
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    val getSavedProjects = Store.getProjects()
-    val projectList by remember {
-        mutableStateOf(
-            mutableListOf<Project>(
-                Project("HBNation Local", "/Users/matt/code/Projects/hbnation/hbnation-site/storage/logs"),
-                Project("NTDF", "/Users/matt/code/Projects/barnhouse/NTDF/storage/logs"),
-            )
-        )
-    }
+    val getSavedProjects = Store.getProjects().toMutableList()
+    val projectList by remember { mutableStateOf(getSavedProjects) }
+
 
     Preferences.userRoot().get("projects", null)
 
@@ -74,54 +71,57 @@ fun HomeScreen(
 
 
         if (projectList.size > 0) {
-            projectList.forEach { project ->
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 2.dp, top = 10.dp, end = 10.dp),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                itemsIndexed(projectList) { index, project ->
+                    Row(
                         modifier = Modifier
-                            .weight(0.3f)
-                            .background(MaterialTheme.colors.onPrimary, RoundedCornerShape(20))
-                            .border(1.dp, MaterialTheme.colors.primary, RoundedCornerShape(20))
-                            .padding(10.dp),
-                        style = TextStyle(textAlign = TextAlign.Center),
-                        text = project.name
-                    )
-                    Text(
-                        modifier = Modifier
-                            .weight(0.7f)
-                            .background(MaterialTheme.colors.onPrimary, RoundedCornerShape(20))
-                            .border(1.dp, MaterialTheme.colors.primary, RoundedCornerShape(20))
-                            .padding(10.dp),
-                        style = TextStyle(textAlign = TextAlign.Center),
-                        text = project.path
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp, top = 0.dp),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.End
-                ) {
-
-                    Box(modifier = Modifier.clickable {
-                        println("Clicked")
-                        navController.currentProject = project
-                        navController.navigate(Screen.LogViewScreen.name)
-                    }.padding(end = 10.dp)) {
-                        Icon(imageVector = Icons.Filled.Visibility, contentDescription = "View")
+                            .fillMaxWidth()
+                            .padding(bottom = 2.dp, top = 10.dp, end = 10.dp),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .weight(0.3f)
+                                .background(MaterialTheme.colors.onPrimary, RoundedCornerShape(20))
+                                .border(1.dp, MaterialTheme.colors.primary, RoundedCornerShape(20))
+                                .padding(10.dp),
+                            style = TextStyle(textAlign = TextAlign.Center),
+                            text = project.name
+                        )
+                        Text(
+                            modifier = Modifier
+                                .weight(0.7f)
+                                .background(MaterialTheme.colors.onPrimary, RoundedCornerShape(20))
+                                .border(1.dp, MaterialTheme.colors.primary, RoundedCornerShape(20))
+                                .padding(10.dp),
+                            style = TextStyle(textAlign = TextAlign.Center),
+                            text = project.path
+                        )
                     }
-                    Box(modifier = Modifier.clickable {
-                        println("Clicked")
-                    }.padding(end = 10.dp)) {
-                        Icon(imageVector = Icons.Filled.DeleteForever, contentDescription = "Remove")
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp, top = 0.dp),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+
+                        Box(modifier = Modifier.clickable {
+                            println("Clicked")
+                            navController.currentProject = project
+                            navController.navigate(Screen.LogViewScreen.name)
+                        }.padding(end = 10.dp)) {
+                            Icon(imageVector = Icons.Filled.Visibility, contentDescription = "View")
+                        }
+                        Box(modifier = Modifier.clickable {
+                            println("Clicked")
+                            projectList.remove(project)
+                            Store.saveProjects(projectList.toList())
+                        }.padding(end = 10.dp)) {
+                            Icon(imageVector = Icons.Filled.DeleteForever, contentDescription = "Remove")
+                        }
                     }
                 }
             }

@@ -21,12 +21,14 @@ object Store {
         val mutable = json.toMutableMap()
         mutable[key] = Json.parseToJsonElement(value)
         val writeJson = JsonObject(mutable)
-        UserPreferencesFile().writer().write(Json.encodeToString(writeJson))
+        UserPreferencesFile().writeText(Json.encodeToString(writeJson))
     }
 
     private fun readAsJson(): JsonObject {
         return try {
-            Json.decodeFromString(UserPreferencesFile().reader().readText())
+            val text = UserPreferencesFile().reader().readText()
+            UserPreferencesFile().reader().close()
+            Json.decodeFromString(text)
         } catch (e: Exception) {
             JsonObject(mapOf())
         }
