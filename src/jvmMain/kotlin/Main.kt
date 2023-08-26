@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.window.Window
@@ -44,29 +43,6 @@ fun App() {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                NavigationRail(
-                    modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight()
-                ) {
-                    screens.forEach {
-                        NavigationRailItem(
-                            selected = currentScreen == it.name,
-                            icon = {
-                                Icon(
-                                    imageVector = it.icon,
-                                    contentDescription = it.label
-                                )
-                            },
-                            label = {
-                                Text(it.label)
-                            },
-                            alwaysShowLabel = false,
-                            onClick = {
-                                navController.navigate(it.name)
-                            }
-                        )
-                    }
-                }
-
                 Box(
                     modifier = Modifier.fillMaxHeight()
                 ) {

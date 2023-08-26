@@ -1,6 +1,7 @@
 package screens.home
 
 import Screen
+import Store
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import data.Project
 import navcontroller.NavController
+import java.util.prefs.Preferences
 
 
 @Composable
@@ -30,13 +32,20 @@ fun HomeScreen(
     navController: NavController
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    val projectList by remember { mutableStateOf(mutableListOf<Project>(
-        Project("Project 1", "/Users/matt/code/Projects/hbnation/hbnation-site/storage/logs"),
-        Project("Project 2", "/Users/matt/code/Projects/barnhouse/NTDF/storage/logs"),
-    )) }
+    val getSavedProjects = Store.getProjects()
+    val projectList by remember {
+        mutableStateOf(
+            mutableListOf<Project>(
+                Project("HBNation Local", "/Users/matt/code/Projects/hbnation/hbnation-site/storage/logs"),
+                Project("NTDF", "/Users/matt/code/Projects/barnhouse/NTDF/storage/logs"),
+            )
+        )
+    }
+
+    Preferences.userRoot().get("projects", null)
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(start = 88.dp, top = 25.dp),
+        modifier = Modifier.fillMaxSize().padding(start = 25.dp, top = 25.dp, end = 25.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
     ) {
@@ -129,6 +138,7 @@ fun HomeScreen(
             onConfirm = { project: Project ->
                 showAddDialog = false
                 projectList.add(project)
+                Store.saveProjects(projectList.toList())
             }
         )
     }

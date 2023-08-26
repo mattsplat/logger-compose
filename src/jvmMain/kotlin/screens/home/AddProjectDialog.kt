@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Window
 import data.Project
 import javax.swing.JFileChooser
@@ -35,10 +34,11 @@ fun AddProjectDialog(visible: Boolean, onDismiss: () -> Unit, onConfirm: (projec
         ) {
 
             Column(
-                modifier = Modifier.fillMaxSize().padding(start = 10.dp, top = 25.dp) ,
+                modifier = Modifier.fillMaxSize().padding(start = 10.dp, top = 50.dp) ,
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start,
             ) {
+
 
 
                 Row(
@@ -78,7 +78,7 @@ fun AddProjectDialog(visible: Boolean, onDismiss: () -> Unit, onConfirm: (projec
                             .padding(end = 0.dp, bottom = 10.dp)
                             .weight(0.3f)
                             .height(50.dp)
-                            .background(Color.White, RoundedCornerShape(20)),
+                            .background(MaterialTheme.colors.primary, RoundedCornerShape(20)),
                         onClick = {
                             val chooser = JFileChooser()
                             chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
@@ -88,7 +88,7 @@ fun AddProjectDialog(visible: Boolean, onDismiss: () -> Unit, onConfirm: (projec
                                 path = chooser.selectedFile.absolutePath
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
                     ) {
                         Text("Choose Folder")
                     }
@@ -121,7 +121,7 @@ fun AddProjectDialog(visible: Boolean, onDismiss: () -> Unit, onConfirm: (projec
                             .padding(end = 10.dp, bottom = 10.dp)
                             .weight(0.5f)
                             .height(50.dp)
-                            .background(Color.White, RoundedCornerShape(20)),
+                            .background(MaterialTheme.colors.primary, RoundedCornerShape(20)),
                         onClick = {
                             onDismiss()
                             text = ""

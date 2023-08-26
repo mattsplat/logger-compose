@@ -4,6 +4,7 @@ plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
 //    id("com.google.devtools.ksp") version "1.8.20-1.0.10"
+
 }
 
 group = "com.example"
@@ -21,12 +22,11 @@ kotlin {
         withJava()
     }
     sourceSets {
-        val nav_version = "2.7.0"
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(compose.materialIconsExtended)
-//                implementation("io.github.raamcosta.compose-destinations:core:compose-1.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
             }
 
         }
