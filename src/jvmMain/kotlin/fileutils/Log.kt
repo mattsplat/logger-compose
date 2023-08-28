@@ -5,4 +5,6 @@ data class Log(
     val env: String,
     val type: String,
     val message: String,
-    val length: Int? = null)
+    var start: Int? = null,
+    val length: Int? = null
+)

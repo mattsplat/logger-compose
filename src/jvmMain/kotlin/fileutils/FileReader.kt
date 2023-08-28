@@ -1,7 +1,8 @@
 package fileutils
 
 class FileReader(path: String) {
-    val pattern =  """^\[(?<date>.*)]\s(?<env>\w+)\.(?<type>\w+):(?<message>.*)"""
+    val pattern = """^\[(?<date>.*)]\s(?<env>\w+)\.(?<type>\w+):(?<message>.*)"""
+    val splitPattern = """\[(?<date>.*)]\s(?<env>\w+)\.(?<type>\w+):"""
     val logs = mutableListOf<Log>()
     val path: String
     val filename: String
@@ -20,20 +21,33 @@ class FileReader(path: String) {
     }
 
     private fun parseFile() {
-        val regex = Regex(pattern, RegexOption.MULTILINE)
-        regex.findAll(file.reader().readText()).map {
+        val splitRegex = Regex(splitPattern, RegexOption.MULTILINE)
+        val text = file.readText()
+        val splits = splitRegex.findAll(text).toList()
+        splits.forEachIndexed { index, it ->
             val date = it.groups["date"]?.value
             val env = it.groups["env"]?.value
             val type = it.groups["type"]?.value
-            val message = it.groups["message"]?.value
-            if (date != null && env != null && type != null && message != null) {
-                val length = it.groups[0].toString().length
-                logs.add(0, Log(date = date, env = env, type = type, message = message, length = length))
+            val start = it.groups.first()?.range?.first
+            if (date != null && env != null && type != null && start != null) {
+                val end =
+                    if (index < splits.count() - 1) splits[index + 1].groups.first()?.range?.first?.minus(1) else text.length - 1
+                val endType = it.groups.first()?.range?.last?.plus(1) ?: 0
+                val message = text.slice(endType..end!!)
+                logs.add(
+                    0,
+                    Log(
+                        date = date,
+                        env = env,
+                        type = type,
+                        message = message,
+                        length = end - start,
+                        start = start
+                    )
+                )
             }
-            it.value
         }
-            .toList().reversed()
-        file.reader().close()
+
 
     }
 
