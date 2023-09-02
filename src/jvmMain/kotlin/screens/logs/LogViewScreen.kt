@@ -8,24 +8,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowLeft
-import androidx.compose.material.icons.filled.ArrowRight
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import components.AnimatedIcon
 import fileutils.FileReader
 import fileutils.FolderReader
 import fileutils.Log
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import navcontroller.NavController
 import java.math.RoundingMode
 import kotlin.math.ceil
@@ -46,6 +48,7 @@ fun LogViewScreen(
             .setScale(2, RoundingMode.DOWN)).toString() else 0.toString()
 
     val watchFolders = remember { mutableStateOf(false) }
+    val loading = remember { mutableStateOf(false) }
 
     val perPage = 25
     var page by remember { mutableStateOf(1) }
@@ -60,23 +63,23 @@ fun LogViewScreen(
         navController.navigate(name.name)
     }
 
+    val coroutineScope = rememberCoroutineScope()
 
 
     Column(modifier = Modifier.fillMaxSize()) {
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 25.dp, start = 25.dp),
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            AnimatedIcon(Icons.Filled.Home, "Home", onClick = {
+                onNavigate(Screen.HomeScreen)
+            })
+
+            Spacer(modifier = Modifier.width(20.dp))
+
             Text("Project: ${project.name}")
-            Button(
-                onClick = {
-                    onNavigate(Screen.HomeScreen)
-                }) {
-                Text("Go Home")
-            }
-            Spacer(modifier = Modifier.height(20.dp))
         }
 
         Row(
@@ -90,7 +93,15 @@ fun LogViewScreen(
                 setWatch = {
                     setWatched(it)
                 },
-                setSelectedFile = { selectedFile = it }
+                setSelectedFile = {
+                    selectedFile = it
+                    page = 1
+                    loading.value = true
+                    coroutineScope.launch {
+                        delay(250)
+                        loading.value = false
+                    }
+                }
             )
 
 
@@ -118,7 +129,7 @@ fun LogViewScreen(
                         style = TextStyle(color = MaterialTheme.colors.onPrimary)
                     )
                     Text(
-                        text = fileSize + " MB",
+                        text = "$fileSize MB",
                         style = TextStyle(color = MaterialTheme.colors.onPrimary),
                         textAlign = TextAlign.End
                     )
@@ -130,6 +141,11 @@ fun LogViewScreen(
                                 modifier = Modifier.clickable {
                                     if (page > 1) {
                                         page--
+                                    }
+                                    loading.value = true
+                                    coroutineScope.launch {
+                                        delay(50)
+                                        loading.value = false
                                     }
                                 }
                             )
@@ -151,6 +167,11 @@ fun LogViewScreen(
                                     if (page <= (fileReader.logCount / perPage)) {
                                         page++
                                     }
+                                    loading.value = true
+                                    coroutineScope.launch {
+                                        delay(50)
+                                        loading.value = false
+                                    }
                                 }
                             )
                         } else {
@@ -162,7 +183,7 @@ fun LogViewScreen(
 
 
                 LazyColumn {
-                    if (fileReader != null && fileReader.logCount > 0) {
+                    if (fileReader != null && fileReader.logCount > 0 && !loading.value) {
                         fileReader.get(25, ((page - 1) * perPage)).forEach { log ->
                             item {
                                 LogLine(log)
@@ -196,6 +217,7 @@ fun LogLine(
     } else {
         log.date + " ${log.type} : " + limitChars(log.message, 100)
     }
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
 
     Row(
         modifier = Modifier
@@ -204,11 +226,17 @@ fun LogLine(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
+        if (isExpanded) {
+            AnimatedIcon(Icons.Filled.CopyAll, "Copy All") {
+                clipboardManager.setText(AnnotatedString(displayText))
+            }
+        }
+
         Text(
             modifier = Modifier
                 .weight(0.9f)
-                .background(MaterialTheme.colors.onPrimary, RoundedCornerShape(20))
-                .border(1.dp, MaterialTheme.colors.primary, RoundedCornerShape(20))
+                .background(MaterialTheme.colors.onPrimary, RoundedCornerShape(12.dp, 12.dp, 12.dp, 12.dp))
+                .border(1.dp, MaterialTheme.colors.primary, RoundedCornerShape(12.dp, 12.dp, 12.dp, 12.dp))
                 .padding(10.dp).clickable { isExpanded = !isExpanded },
             style = TextStyle(textAlign = TextAlign.Center),
             text = displayText,
